@@ -3,7 +3,7 @@ title SRS Launcher
 color 0b
 
 set "TARGET_DIR=C:\Program Files\DCS-SimpleRadio-Standalone\Client"
-set "URL=https://github.com/LetalDark/DCS-Automatico/raw/refs/heads/main/Start_Radio.ps1"
+set "URL=https://raw.githubusercontent.com/LetalDark/DCS-Automatico/refs/heads/main/Start_Radio.ps1"
 set "PS1_FILE=%TARGET_DIR%\Start_Radio.ps1"
 
 echo.
@@ -15,30 +15,39 @@ echo.
 :: === Crear carpeta si no existe ===
 if not exist "%TARGET_DIR%" (
     echo [INFO] Creando carpeta Client...
-    
     echo New-Item -Path "%TARGET_DIR%" -ItemType Directory -Force > "%TEMP%\CreateSRSFolder.ps1"
     echo exit >> "%TEMP%\CreateSRSFolder.ps1"
-    
     powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"%TEMP%\CreateSRSFolder.ps1\"' -Wait"
-    
     timeout /t 2 /nobreak >nul
-    
-    if not exist "%TARGET_DIR%" (
+    if exist "%TARGET_DIR%" (
+        echo [OK] Carpeta creada correctamente.
+    ) else (
         echo [ERROR] No se pudo crear la carpeta.
         pause
         exit /b 1
     )
-    echo [OK] Carpeta creada correctamente.
 ) else (
     echo [INFO] Carpeta Client ya existe.
 )
 
-:: === Actualizar el script .ps1 ===
+:: === Descargar Start_Radio.ps1 (con elevacion si hace falta) ===
 echo.
 echo [SRS] Descargando la ultima version...
-powershell -Command "$progressPreference = 'silentlyContinue'; try { iwr -Uri '%URL%' -OutFile '%PS1_FILE%' -UseBasicParsing; Write-Host '[OK] Actualizado correctamente' -ForegroundColor Green } catch { Write-Host '[ERROR] No se pudo descargar. Usando version local si existe.' -ForegroundColor Red }"
 
-:: === Ejecutar el script .ps1 ===
+:: Primero intentamos sin admin
+powershell -Command "$progressPreference = 'silentlyContinue'; try { iwr -Uri '%URL%' -OutFile '%PS1_FILE%' -UseBasicParsing; Write-Host '[OK] Actualizado' -ForegroundColor Green; exit 0 } catch { exit 1 }" >nul 2>&1
+
+if errorlevel 1 (
+    echo [INFO] Se necesitan permisos de administrador para actualizar...
+    echo $url = '%URL%' > "%TEMP%\DownloadSRS.ps1"
+    echo $out = '%PS1_FILE%' >> "%TEMP%\DownloadSRS.ps1"
+    echo try { iwr -Uri $url -OutFile $out -UseBasicParsing; Write-Host '[OK] Actualizado correctamente' -ForegroundColor Green } catch { Write-Host '[ERROR] Fallo incluso con admin:' -ForegroundColor Red; $_.Exception.Message } >> "%TEMP%\DownloadSRS.ps1"
+    echo exit >> "%TEMP%\DownloadSRS.ps1"
+    
+    powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"%TEMP%\DownloadSRS.ps1\"' -Wait"
+)
+
+:: === Ejecutar ===
 if exist "%PS1_FILE%" (
     echo.
     echo [SRS] Ejecutando Start_Radio.ps1...
@@ -51,8 +60,7 @@ if exist "%PS1_FILE%" (
     exit /b 1
 )
 
-:: === Todo correcto → cerrar automáticamente (sin pausa) ===
 echo.
 echo ================================================
-echo Todo correcto. Cerrando...
+echo Todo correcto.
 exit
