@@ -1,6 +1,6 @@
 param([switch]$Elevated, [string]$ZipPath = "")
 
-# === FUNCION: Auto-actualizar Radio.bat ===
+# === FUNCION: Auto-actualizar Radio.bat (con elevacion si hace falta) ===
 function Update-RadioBat {
     $BatUrl  = "https://github.com/LetalDark/DCS-Automatico/raw/refs/heads/main/Radio.bat"
     $BatPath = Join-Path (Split-Path $PSCommandPath -Parent) "Radio.bat"
@@ -15,12 +15,31 @@ function Update-RadioBat {
             Copy-Item $tempFile $BatPath -Force
             Write-Host "[OK] Radio.bat actualizado correctamente" -ForegroundColor Green
         } else {
-            Write-Host "[OK] Radio.bat esta actualizado" -ForegroundColor Gray
+            Write-Host "[OK] Radio.bat ya esta al dia" -ForegroundColor Gray
         }
         Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
     }
     catch {
-        Write-Host "[INFO] No se pudo actualizar Radio.bat" -ForegroundColor Yellow
+        if ($_.Exception.Message -like "*Acceso denegado*" -or $_.Exception.Message -like "*UnauthorizedAccess*") {
+            Write-Host "[INFO] Se necesitan permisos de administrador para actualizar Radio.bat..." -ForegroundColor Yellow
+            
+            $tempUpdate = Join-Path $env:TEMP "UpdateRadioBat.ps1"
+            @"
+`$BatUrl = '$BatUrl'
+`$BatPath = '$BatPath'
+`$tempFile = Join-Path `$env:TEMP 'Radio.bat.new'
+iwr -Uri `$BatUrl -OutFile `$tempFile -UseBasicParsing
+Copy-Item `$tempFile `$BatPath -Force
+Remove-Item `$tempFile -Force
+Write-Host '[OK] Radio.bat actualizado con permisos de administrador' -ForegroundColor Green
+"@ | Set-Content $tempUpdate -Encoding UTF8
+
+            Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$tempUpdate`"" -Wait
+            Remove-Item $tempUpdate -Force -ErrorAction SilentlyContinue
+        } 
+        else {
+            Write-Host "[INFO] No se pudo actualizar Radio.bat (usando version local)" -ForegroundColor Yellow
+        }
     }
 }
 
@@ -534,4 +553,5 @@ Write-Host "--------------------------------------------------" -ForegroundColor
 } 
 else {
     Write-Host "La instalacion parece haber fallado" -ForegroundColor Yellow
+
 }
