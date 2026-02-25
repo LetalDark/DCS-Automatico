@@ -1,5 +1,32 @@
 param([switch]$Elevated, [string]$ZipPath = "")
 
+# === FUNCION: Auto-actualizar Radio.bat ===
+function Update-RadioBat {
+    $BatUrl  = "https://github.com/LetalDark/DCS-Automatico/raw/refs/heads/main/Radio.bat"
+    $BatPath = Join-Path (Split-Path $PSCommandPath -Parent) "Radio.bat"
+
+    Write-Host "[AUTO-UPDATE] Comprobando Radio.bat..." -ForegroundColor Cyan
+
+    try {
+        $tempFile = Join-Path $env:TEMP "Radio.bat.new"
+        Invoke-WebRequest -Uri $BatUrl -OutFile $tempFile -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
+
+        if ((Get-Content $tempFile -Raw) -ne (Get-Content $BatPath -Raw -ErrorAction SilentlyContinue)) {
+            Copy-Item $tempFile $BatPath -Force
+            Write-Host "[OK] Radio.bat actualizado correctamente" -ForegroundColor Green
+        } else {
+            Write-Host "[OK] Radio.bat esta actualizado" -ForegroundColor Gray
+        }
+        Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+    }
+    catch {
+        Write-Host "[INFO] No se pudo actualizar Radio.bat" -ForegroundColor Yellow
+    }
+}
+
+# Actualizar el launcher antes de continuar
+Update-RadioBat
+
 # === FIX CONEXION SEGURA ===
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
