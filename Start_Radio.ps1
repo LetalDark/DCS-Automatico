@@ -1,6 +1,6 @@
 param([switch]$Elevated, [string]$ZipPath = "")
 
-# === FUNCION: Auto-actualizar Radio.bat (compacta con elevacion automatica) ===
+# === FUNCION COMPACTA: Auto-actualizar Radio.bat (elevacion fiable) ===
 function Update-RadioBat {
     $BatUrl  = "https://github.com/LetalDark/DCS-Automatico/raw/refs/heads/main/Radio.bat"
     $BatPath = Join-Path (Split-Path $PSCommandPath -Parent) "Radio.bat"
@@ -11,6 +11,7 @@ function Update-RadioBat {
         $tempFile = Join-Path $env:TEMP "Radio.bat.new"
         Invoke-WebRequest -Uri $BatUrl -OutFile $tempFile -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
 
+        # Si el archivo existe y es diferente → actualizar
         if ((Get-Content $tempFile -Raw) -ne (Get-Content $BatPath -Raw -ErrorAction SilentlyContinue)) {
             Copy-Item $tempFile $BatPath -Force
             Write-Host "[OK] Radio.bat actualizado correctamente" -ForegroundColor Green
@@ -21,17 +22,20 @@ function Update-RadioBat {
     }
     catch {
         if ($_.Exception.Message -like "*Acceso denegado*" -or $_.Exception.Message -like "*UnauthorizedAccess*") {
-            Write-Host "[INFO] Se necesitan permisos de administrador..." -ForegroundColor Yellow
+            Write-Host "[INFO] Elevando permisos para actualizar Radio.bat..." -ForegroundColor Yellow
+            
             $tempScript = Join-Path $env:TEMP "UpdateRadioBat.ps1"
             @"
 iwr -Uri '$BatUrl' -OutFile '$tempFile' -UseBasicParsing
 Copy-Item '$tempFile' '$BatPath' -Force
 Remove-Item '$tempFile' -Force
-Write-Host '[OK] Radio.bat actualizado con admin' -ForegroundColor Green
-"@ | Set-Content $tempScript
+Write-Host '[OK] Radio.bat actualizado con permisos de administrador' -ForegroundColor Green
+"@ | Set-Content $tempScript -Encoding UTF8
+
             Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$tempScript`"" -Wait
             Remove-Item $tempScript -Force -ErrorAction SilentlyContinue
-        } else {
+        } 
+        else {
             Write-Host "[INFO] No se pudo actualizar Radio.bat" -ForegroundColor Yellow
         }
     }
