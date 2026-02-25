@@ -1,6 +1,6 @@
 ﻿[
   {
-    "enc": true,
+    "enc": false,
     "encKey": 0,
     "encMode": 0,
     "freqMax": 100.0,
@@ -107,5 +107,4 @@
     "simul": false,
     "rtMode": 1
   }
-
 ]
