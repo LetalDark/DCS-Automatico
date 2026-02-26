@@ -9,7 +9,7 @@
     "modulation": 2,
     "name": "SATCOM",
     "secFreq": 0.0,
-    "volume": 1.0,
+    "volume": 0.0,
     "freqMode": 0,
     "volMode": 1,
     "expansion": false,
