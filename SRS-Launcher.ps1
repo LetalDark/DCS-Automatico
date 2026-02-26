@@ -510,7 +510,7 @@ function Update-CustomSRSFiles {
     Write-Host "[DEBUG] Update-CustomSRSFiles finalizado completamente" -ForegroundColor Gray
 }
 
-# === FUNCION 8: Crear acceso directo en Escritorio con icono Yokai ===
+# === FUNCION 8: Crear/Actualizar acceso directo en Escritorio con icono Yokai ===
 function Create-DesktopShortcut {
     Write-Host "[DEBUG] Iniciando Create-DesktopShortcut..." -ForegroundColor Gray
 
@@ -525,30 +525,22 @@ function Create-DesktopShortcut {
         return
     }
 
-    # 2. Si ya existe el acceso directo → no hacer nada
-    if (Test-Path $shortcutPath) {
-        Write-Host "[INFO] Acceso directo 'SRS Yokai Radio.lnk' ya existe en el Escritorio" -ForegroundColor Gray
-        return
-    }
-
-    # 3. Descargar el icono si no existe
+    # 2. Descargar icono si no existe (siempre se asegura de tenerlo)
     $icoUrl = "https://github.com/LetalDark/DCS-Automatico/raw/refs/heads/main/Yokai-SRS.ico"
     if (-not (Test-Path $iconPath)) {
         Write-Host "[DEBUG] Descargando Yokai-SRS.ico..." -ForegroundColor Gray
         try {
-            Invoke-WebRequest -Uri $icoUrl -OutFile $iconPath -UseBasicParsing -TimeoutSec 15
+            Invoke-WebRequest -Uri $icoUrl -OutFile $iconPath -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
             Write-Host "[OK] Icono Yokai descargado correctamente" -ForegroundColor Green
         } catch {
-            Write-Host "[ERROR] No se pudo descargar el icono: $($_.Exception.Message)" -ForegroundColor Red
-            return
+            Write-Host "[ERROR] No se pudo descargar el icono (se creará shortcut sin icono)" -ForegroundColor Red
         }
     } else {
         Write-Host "[DEBUG] Icono Yokai-SRS.ico ya existe" -ForegroundColor Gray
     }
 
-    # 4. Crear el acceso directo
+    # 3. Crear o actualizar el acceso directo
     try {
-        Write-Host "[DEBUG] Creando acceso directo 'SRS Yokai Radio.lnk' en el Escritorio..." -ForegroundColor Gray
         $shell = New-Object -ComObject WScript.Shell
         $shortcut = $shell.CreateShortcut($shortcutPath)
         $shortcut.TargetPath = $targetCmd
@@ -556,9 +548,11 @@ function Create-DesktopShortcut {
         $shortcut.IconLocation = "$iconPath,0"
         $shortcut.Save()
 
-        Write-Host "[OK] Acceso directo 'SRS Yokai Radio.lnk' creado en el Escritorio con icono Yokai" -ForegroundColor Green
+        if (Test-Path $shortcutPath) {
+            Write-Host "[OK] Acceso directo 'SRS Yokai Radio.lnk' creado/actualizado correctamente con icono Yokai" -ForegroundColor Green
+        }
     } catch {
-        Write-Host "[ERROR] No se pudo crear el acceso directo: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[ERROR] No se pudo crear/actualizar el acceso directo: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
