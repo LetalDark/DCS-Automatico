@@ -510,6 +510,58 @@ function Update-CustomSRSFiles {
     Write-Host "[DEBUG] Update-CustomSRSFiles finalizado completamente" -ForegroundColor Gray
 }
 
+# === FUNCION 8: Crear acceso directo en Escritorio con icono Yokai ===
+function Create-DesktopShortcut {
+    Write-Host "[DEBUG] Iniciando Create-DesktopShortcut..." -ForegroundColor Gray
+
+    $desktop = [Environment]::GetFolderPath("Desktop")
+    $shortcutPath = Join-Path $desktop "SRS Yokai Radio.lnk"
+    $targetCmd = Join-Path $env:LOCALAPPDATA "DCS-SimpleRadio-Standalone\Client\SRS-Launcher.cmd"
+    $iconPath   = Join-Path $env:LOCALAPPDATA "DCS-SimpleRadio-Standalone\Client\Yokai-SRS.ico"
+
+    # 1. Solo se ejecuta si SRS está instalado
+    if (-not (Get-SRSInstalled).Installed) {
+        Write-Host "[DEBUG] SRS no instalado → no se crea acceso directo" -ForegroundColor Gray
+        return
+    }
+
+    # 2. Si ya existe el acceso directo → no hacer nada
+    if (Test-Path $shortcutPath) {
+        Write-Host "[INFO] Acceso directo 'SRS Yokai Radio.lnk' ya existe en el Escritorio" -ForegroundColor Gray
+        return
+    }
+
+    # 3. Descargar el icono si no existe
+    $icoUrl = "https://github.com/LetalDark/DCS-Automatico/raw/refs/heads/main/Yokai-SRS.ico"
+    if (-not (Test-Path $iconPath)) {
+        Write-Host "[DEBUG] Descargando Yokai-SRS.ico..." -ForegroundColor Gray
+        try {
+            Invoke-WebRequest -Uri $icoUrl -OutFile $iconPath -UseBasicParsing -TimeoutSec 15
+            Write-Host "[OK] Icono Yokai descargado correctamente" -ForegroundColor Green
+        } catch {
+            Write-Host "[ERROR] No se pudo descargar el icono: $($_.Exception.Message)" -ForegroundColor Red
+            return
+        }
+    } else {
+        Write-Host "[DEBUG] Icono Yokai-SRS.ico ya existe" -ForegroundColor Gray
+    }
+
+    # 4. Crear el acceso directo
+    try {
+        Write-Host "[DEBUG] Creando acceso directo 'SRS Yokai Radio.lnk' en el Escritorio..." -ForegroundColor Gray
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($shortcutPath)
+        $shortcut.TargetPath = $targetCmd
+        $shortcut.WorkingDirectory = Split-Path $targetCmd -Parent
+        $shortcut.IconLocation = "$iconPath,0"
+        $shortcut.Save()
+
+        Write-Host "[OK] Acceso directo 'SRS Yokai Radio.lnk' creado en el Escritorio con icono Yokai" -ForegroundColor Green
+    } catch {
+        Write-Host "[ERROR] No se pudo crear el acceso directo: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
 # ====================== INICIO DEL SCRIPT ======================
 
 # Actualizar el launcher antes de continuar
@@ -618,5 +670,8 @@ if ($checkFinal.Installed) {
 } else {
     Write-Host "La instalacion parece haber fallado" -ForegroundColor Yellow
 }
+
+# === Crear acceso directo en Escritorio (solo primera vez) ===
+Create-DesktopShortcut
 
 Write-Host "[DEBUG] === FIN DEL SCRIPT PRINCIPAL ===" -ForegroundColor Gray
