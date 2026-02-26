@@ -418,8 +418,13 @@ function Update-CustomSRSFiles {
         @{ Name = "FavouriteServers.csv"; Mandatory = $true },
         @{ Name = "global.cfg"; Mandatory = $false },
         @{ Name = "default.cfg"; Mandatory = $false },
-        @{ Name = "general.txt"; Mandatory = $false },
-        @{ Name = "intercom.txt"; Mandatory = $false }
+        @{ Name = "Global.txt"; Mandatory = $true },
+		@{ Name = "Flotas.txt"; Mandatory = $true },
+		@{ Name = "Naves.txt"; Mandatory = $true },
+		@{ Name = "Tripulacion.txt"; Mandatory = $true },
+		@{ Name = "Terrestre.txt"; Mandatory = $true },
+		@{ Name = "Escuadras.txt"; Mandatory = $true },
+        @{ Name = "Comandancia.txt"; Mandatory = $true }
     )
     $fileNames = $customFiles | ForEach-Object { $_.Name }
     Write-Host "[DEBUG] Archivos a comprobar: $($fileNames -join ', ')" -ForegroundColor Gray
@@ -667,5 +672,4 @@ if ($checkFinal.Installed) {
 
 # === Crear acceso directo en Escritorio (solo primera vez) ===
 Create-DesktopShortcut
-
 Write-Host "[DEBUG] === FIN DEL SCRIPT PRINCIPAL ===" -ForegroundColor Gray
