@@ -142,5 +142,23 @@
     "channel": -1,
     "simul": false,
     "rtMode": 1
+  },
+   {
+    "enc": false,
+    "encKey": 1,
+    "encMode": 1,
+    "freqMax": 400999999.0,
+    "freqMin": 400000000.0,
+    "freq": 400000000.0,
+    "modulation": 1,
+    "name": "Otros",
+    "secFreq": 243000000.0,
+    "volume": 0.0,
+    "freqMode": 1,
+    "volMode": 1,
+    "expansion": false,
+    "channel": -1,
+    "simul": false,
+    "rtMode": 1
   }
 ]
