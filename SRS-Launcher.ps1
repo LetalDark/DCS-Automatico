@@ -424,7 +424,8 @@ function Update-CustomSRSFiles {
 		@{ Name = "Tripulacion.txt"; Mandatory = $true },
 		@{ Name = "Terrestre.txt"; Mandatory = $true },
 		@{ Name = "Escuadras.txt"; Mandatory = $true },
-        @{ Name = "Comandancia.txt"; Mandatory = $true }
+        @{ Name = "Comandancia.txt"; Mandatory = $true },
+		@{ Name = "Otros.txt"; Mandatory = $true }
     )
     $fileNames = $customFiles | ForEach-Object { $_.Name }
     Write-Host "[DEBUG] Archivos a comprobar: $($fileNames -join ', ')" -ForegroundColor Gray
@@ -672,4 +673,5 @@ if ($checkFinal.Installed) {
 
 # === Crear acceso directo en Escritorio (solo primera vez) ===
 Create-DesktopShortcut
+
 Write-Host "[DEBUG] === FIN DEL SCRIPT PRINCIPAL ===" -ForegroundColor Gray
