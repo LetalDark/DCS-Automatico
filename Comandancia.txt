@@ -1,2 +1,3 @@
-Radio|105.0
-ComGeneral|105.10
+Radio|105.00
+Coms-1|105.10
+Coms-2|105.20
