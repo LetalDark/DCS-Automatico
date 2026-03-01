@@ -1,0 +1,11 @@
+Radio|150.00
+Terrestre-1|150.01
+Terrestre-2|150.02
+Terrestre-3|150.03
+Terrestre-4|150.04
+Terrestre-5|150.05
+Terrestre-6|150.06
+Terrestre-7|150.07
+Terrestre-8|150.08
+Terrestre-9|150.09
+Terrestre-10|150.10

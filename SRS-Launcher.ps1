@@ -419,12 +419,12 @@ function Update-CustomSRSFiles {
         @{ Name = "global.cfg"; Mandatory = $false },
         @{ Name = "default.cfg"; Mandatory = $false },
         @{ Name = "Global.txt"; Mandatory = $true },
+		@{ Name = "Comandancia.txt"; Mandatory = $true },
 		@{ Name = "Flotas.txt"; Mandatory = $true },
 		@{ Name = "Naves.txt"; Mandatory = $true },
 		@{ Name = "Tripulacion.txt"; Mandatory = $true },
 		@{ Name = "Terrestre.txt"; Mandatory = $true },
-		@{ Name = "Escuadras.txt"; Mandatory = $true },
-        @{ Name = "Comandancia.txt"; Mandatory = $true },
+		@{ Name = "Equipo-Terrestre.txt"; Mandatory = $true },
 		@{ Name = "Otros.txt"; Mandatory = $true }
     )
     $fileNames = $customFiles | ForEach-Object { $_.Name }
